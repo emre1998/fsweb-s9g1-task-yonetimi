@@ -1,49 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import {useForm} from "react-hook-form";
 
-const PeopleForm = ({ kisiler, submitFn }) => {
-  const [isim, setIsim] = useState("");
-  const [error, setError] = useState(null);
+ const PeopleForm =({kisiler,submitFn})=>{
+  const {register,handleSubmit,formState:{errors}} = useForm({defaultValues:{isim:""}});
 
-  useEffect(() => {
-    if (kisiler.includes(isim)) {
-      setError("Bu isim daha önce eklenmiş")
-    } else {
-      setError(null)
-    }
-  }, [isim, kisiler])
-
-  function handleIsimChange(e) {
-    setIsim(e.target.value);
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
+  const onSubmit = (data)=>{
+    const {isim}= data;
     submitFn(isim);
-    setIsim("");
-  }
-
+  };
+  
+  const validateIsim = (value)=>{
+    if(kisiler.includes(value)) {
+      return "Bu isim daha önce eklenmiş";
+    }
+    if(value.length<3){
+      return "En az 3 karakter olmalıdır";
+    }
+    return true;
+  };
+ 
   return (
-    <form className="taskForm" onSubmit={handleSubmit}>
+    <form className="taskForm" onSubmit={handleSubmit(onSubmit)}>
       <div className="form-line">
-        <label className="input-label" htmlFor="title">
+        <label className="input-label" htmlFor="isim">
           İsim
         </label>
         <input
           className="input-text"
-          id="title"
-          name="title"
+          id="isim"
+          name="isim"
           type="text"
-          onChange={handleIsimChange}
-          value={isim}
+          {...register("isim",{validate:validateIsim})}
         />
-        <p className="input-error">{error}</p>
+        {errors.isim && <p className="input-error">{errors.isim.message}</p>}
       </div>
 
       <div className="form-line">
         <button
           className="submit-button"
           type="submit"
-          disabled={isim.length === 0 || error}
+          disabled={kisiler.length === 0 || errors.kisiler} 
         >
           Ekle
         </button>
